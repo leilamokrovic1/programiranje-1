@@ -3,7 +3,8 @@
   Napišite predikat `je_urejena : int * int * int -> bool`, ki pove, ali je 
   podana trojica celih števil urejena strogo naraščajoče.
 [*----------------------------------------------------------------------------*)
-
+let je_urejena : int * int * int -> bool=
+   fun (x, y, z) -> x < y && y < z
 (* b *)
 (*----------------------------------------------------------------------------*]
   Napišite funkcijo `poskusi_deljenje : float option -> float option -> float option`, 
@@ -18,7 +19,12 @@
     # poskusi_deljenje None (Some 2.0);;
     - : float option = None
 [*----------------------------------------------------------------------------*)
-
+let poskusi_deljenje deljenec delitelj= 
+match (deljenec, delitelj) with
+| (Some x, Some y) -> ( match y with 
+  | 0.0 -> None
+  | _ -> Some (x/. y))
+| _ -> None
 (* c *)
 (*----------------------------------------------------------------------------*]
   Definirajte funkcijo `zavrti : 'a list -> int -> 'a list`, ki seznam zavrti 
@@ -28,7 +34,12 @@
     # zavrti [1; 2; 3; 4; 5] 2;;
     - : int list = [3; 4; 5; 1; 2]
 [*----------------------------------------------------------------------------*)
-
+let rec zavrti sez n = 
+if n <= 0 then sez
+else 
+  match sez with
+  | [] -> []
+  | x :: xs -> zavrti (xs @ [x]) (n-1) 
 (* d *)
 (*----------------------------------------------------------------------------*]
   Napišite funkcijo `razdeli : ('a -> int) -> 'a list -> ('a list *  'a list * 'a list)|`, 
@@ -41,3 +52,11 @@
     # razdeli ((-) 3) [1; 2; 3; 4; 5; 6];;
     - : int list * int list * int list = ([4; 5; 6], [3], [1; 2])
 [*----------------------------------------------------------------------------*)
+let razdeli f seznam = 
+   let rec razdeli_aux negativen nicelni ostali= function 
+   | [] ->  negativen, nicelni, ostali
+   | x :: xs when f x < 0 -> razdeli_aux (negativen @ [x])  nicelni ostali xs
+   | x :: xs when f x = 0 -> razdeli_aux negativen (nicelni @ [x]) ostali xs
+   | x :: xs ->  razdeli_aux negativen nicelni (ostali @ [x] ) xs in 
+razdeli_aux [] [] [] seznam
+   

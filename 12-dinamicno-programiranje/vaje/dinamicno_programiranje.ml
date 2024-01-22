@@ -21,6 +21,17 @@ let test_matrix =
      [| 2 ; 4 ; 5 |];
      [| 7 ; 0 ; 1 |] |]
 
+
+let max_cheese cheese_matrix = 
+   let dimy = Array.length cheese_matrix in 
+   let dimx = Array.length cheese_matrix.(0) in
+   let rec best_path y x=
+      let current = cheese_matrix.(y).(x) in
+      let best_right = if x+1 >= dimy then 0 else best_path y (x+1) in
+      let best_down = if y +1 >= dimx then 0 else best_path (y+1) x in 
+      current + max (best_right) (best_down) in 
+      best_path 0 0
+
 (*----------------------------------------------------------------------------*]
  Poleg količine sira, ki jo miška lahko poje, jo zanima tudi točna pot, ki naj
  jo ubere, da bo prišla do ustrezne pojedine.
@@ -38,6 +49,34 @@ let test_matrix =
 
 type mouse_direction = Down | Right
 
+let optimal_path cheese_matrix = 
+   let dimy = Array.length cheese_matrix in 
+   let dimx = Array.length cheese_matrix.(0) in
+   let rec best_path y x=
+      let current = cheese_matrix.(y).(x) in
+      let best_right, path_right =
+      if x + 1 = dimy then (0, []) else best_path y (x+1) in
+      let best_down, path_down =
+      if y+1 = dimx then (0, []) else best_path (y+1) x in
+
+      let best, step=
+      if best_down >= best_right then (best_down, Down::path_down)
+      else (best_right, Right :: path_right)
+   in 
+   (current + best, step)
+in
+best_path 0 0 |> snd
+
+let convert_path cheese_matrix path= 
+   let rec walk y x = function
+   | [] -> []
+   | dir :: xs -> 
+      let r, d=
+      match dir with Right -> (0, 1) | Down -> (1, 0)
+   in
+   cheese_matrix.(y).(x) :: walk (y + d) (x + r) xs in 
+   walk 0 0 path
+      
 
 (*----------------------------------------------------------------------------*]
  Rešujemo problem sestavljanja alternirajoče obarvanih stolpov. Imamo štiri
@@ -54,9 +93,17 @@ type mouse_direction = Down | Right
  # alternating_towers 10;;
  - : int = 35
 [*----------------------------------------------------------------------------*)
-
-
-
+let alternating_towers višina=
+let rec redtop višina=
+   if višina <= 0 then 0
+   else if višina <= 2 then 1
+   else bluetop (višina -1) + bluetop (višina-2)
+and bluetop višina =
+   if višina <= 1 then 0
+   else if višina <= 3 then 1
+   else redtop (višina -2) + redtop (višina -3)
+in
+redtop višina + bluetop višina
 (*----------------------------------------------------------------------------*]
  Izračunali smo število stolpov, a naše vrle gradbince sedaj zanima točna
  konfiguracija. Da ne pride do napak pri sestavljanju, bomo stolpe predstavili
@@ -86,6 +133,23 @@ type red_tower = TopRed of red_block * blue_tower | RedBottom
 and blue_tower = TopBlue of blue_block * red_tower | BlueBottom
 
 type tower = Red of red_tower | Blue of blue_tower
+
+let rec add_red red_block = List.map(fun t -> TopRed(red_block, t))
+let rec add_blue blue_block = List.map(fun t -> TopBlue(blue_block, t))
+let enumerate_towers višina = 
+   let rec redtop višina=
+   if višina <0 then []
+   else if višina = 0 then [RedBottom]
+   else
+      add_red Red1 (bluetop (višina -1))
+      @ add_red Red2 (bluetop (višina -2))
+      and bluetop višina=
+      if višina < 0 then []
+      else if višina = 0 then [BlueBottom]
+      else
+         add_blue Blue2 (redtop (višina-2))
+         @ add_blue Blue3 (redtop (višina -3))
+      in List.map (fun t -> Red t )(redtop višina) @ List.map (fun t -> Blue t) (bluetop višina)
 
 (*----------------------------------------------------------------------------*]
  Vdrli ste v tovarno čokolade in sedaj stojite pred stalažo kjer so ena ob

@@ -15,6 +15,11 @@
  # insert 7 [];;
  - : int list = [7]
 [*----------------------------------------------------------------------------*)
+let rec insert y = 
+  function
+  | [] -> y :: []
+  | x :: xs when y <= x -> y :: x:: xs
+  | x :: xs -> x :: (insert y xs)
 
 
 (*----------------------------------------------------------------------------*]
@@ -22,7 +27,7 @@
  zaporedoma vstavlja vse elemente seznama v prazen seznam.
 [*----------------------------------------------------------------------------*)
 
-
+let insert_sort list = List.fold_left (fun acc x -> insert x acc) [] list
 
 (*~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~*]
  Urejanje z Izbiranjem
@@ -69,32 +74,69 @@
  # test;;
  - : int array = [|0; 4; 2; 3; 1|]
 [*----------------------------------------------------------------------------*)
-
+let swap tabela i j = 
+  let a = tabela.(i) in 
+  tabela.(i) <- tabela.(j);
+  tabela.(j) <- a
 
 (*----------------------------------------------------------------------------*]
  Funkcija [index_min a lower upper] poišče indeks najmanjšega elementa tabele
  [a] med indeksoma [lower] and [upper] (oba indeksa sta vključena).
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
- index_min [|0; 2; 9; 3; 6|] 2 4 = 4
+ index_min [|0; 2; 9; 3; 6|] 2 4 = 3
 [*----------------------------------------------------------------------------*)
-
+let index_min tabela l u =
+  let index_min = ref l in
+  for i = l to u do 
+    if tabela.(i) < tabela.(!index_min) then
+    index_min := i
+  done;
+  !index_min
 
 (*----------------------------------------------------------------------------*]
  Funkcija [selection_sort_array] implementira urejanje z izbiranjem na mestu. 
 [*----------------------------------------------------------------------------*)
-
+let selection_sort_array tabela = 
+  let n = Array.length tabela in
+  for i= 0 to n - 2 do 
+    let minimalni = ref i in
+    for j = i +1 to n -1 do 
+      if  tabela.(j) < tabela.(!minimalni) then minimalni := j
+      done;
+      swap tabela i !minimalni
+    done
 
 (*----------------------------------------------------------------------------*]
  Funkcija [min_and_rest list] vrne par [Some (z, list')] tako da je [z]
  najmanjši element v [list] in seznam [list'] enak [list] z odstranjeno prvo
  pojavitvijo elementa [z]. V primeru praznega seznama vrne [None]. 
 [*----------------------------------------------------------------------------*)
+let min_and_rest list = 
+  let rec remove_one z = 
+    function
+    | [] -> failwith "ni elementov"
+    | x :: xs -> if x = z then xs else x :: remove_one z  xs
+  in 
+  let rec find_min current_min = function
+  | [] -> current_min
+  | x :: xs -> find_min (min x current_min) xs
+  in
+  match list with
+  | [] -> None
+  | x :: xs -> let z = find_min x xs in 
+Some(z, remove_one z (x :: xs))
 
 (*----------------------------------------------------------------------------*]
  Funkcija [selection_sort] je implementacija zgoraj opisanega algoritma.
  Namig: Uporabi [min_and_rest] iz prejšnje naloge.
 [*----------------------------------------------------------------------------*)
+let selection_sort list = 
+  let rec aux sorted unsorted =
+    match min_and_rest unsorted with
 
+    | None -> List.rev sorted
+    | Some(x, unsorted') -> aux (x::sorted) unsorted'
+  in aux [] list
 
 (*----------------------------------------------------------------------------*]
  Funkcija [randlist len max] generira seznam dolžine [len] z naključnimi
@@ -103,7 +145,11 @@
  # let l = randlist 10 10 ;;
  val l : int list = [0; 1; 0; 4; 0; 9; 1; 2; 5; 4]
 [*----------------------------------------------------------------------------*)
-
+let rec randlist len max = 
+  if len <= 0
+    then []
+else
+  Random.int max :: (randlist (len-1) max)
 
 (*-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=*]
  Sedaj lahko s pomočjo [randlist] primerjamo našo urejevalno funkcijo (imenovana

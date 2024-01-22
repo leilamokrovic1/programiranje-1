@@ -10,13 +10,28 @@ from functools import cache
 # Primer: v seznamu `[2, 3, 6, 8, 4, 4, 6, 7, 12, 8, 9]` kot rezultat vrne
 # podzaporedje `[2, 3, 4, 4, 6, 7, 8, 9]`.
 # -----------------------------------------------------------------------------
+def najdaljse_narascajoce_podazporedje(sez):
+    @cache
+    def najdaljse(spodnja_meja, i):
+        if i >= len(sez):
+            return []
+        elif sez[i] < spodnja_meja:
+            return najdaljse(spodnja_meja, i +1)
+        else: 
+            z_prvim = [sez[i]] + najdaljse(sez[i], i +1)
+            brez_prvega = najdaljse(spodnja_meja, i+1)
+            if len(z_prvim) > len(brez_prvega):
+                return z_prvim
+            else: 
+                return brez_prvega
+
+    return najdaljse(float("-inf"), 0)
+
 
 # -----------------------------------------------------------------------------
 # Rešitev sedaj popravite tako, da funkcija `vsa_najdaljsa` vrne seznam vseh
 # najdaljših naraščajočih podzaporedij.
 # -----------------------------------------------------------------------------
-
-
 
 # =============================================================================
 # Žabica
@@ -43,7 +58,15 @@ from functools import cache
 # dva.
 # =============================================================================
 
-
+def zabica(mocvara):
+    @cache
+    def pobeg(k, e):
+        if k>= len(mocvara):
+            return 0
+        else:
+            e += mocvara[k]
+            return 1 + min([pobeg(k+d, e- d) for d in range(1, e+1)])
+    return pobeg(0,0)
 
 # =============================================================================
 # Nageljni
@@ -65,9 +88,21 @@ from functools import cache
 #     [1, 1, 0, 0, 1, 1, 0, 1, 1]
 #     [0, 1, 1, 0, 1, 1, 0, 1, 1]
 # =============================================================================
-
-
-
+def nageljni(n, m, l):
+    if n<1:
+        return []
+    elif m<= 0:
+        return n*[0]
+    elif n == l and m == 1:
+        return n*[1]
+         #optimizacija
+    elif n < (l+1)*m -1:
+        return  None
+    else: 
+        ne_zacnemo_na_zac = [[0] + postavitev for postavitev in nageljni(n-1, m, l)]
+        zacnemo_na_zac = [[1]*l + [0] + postavitev for postavitev in nageljni(n-l, m - 1 , l)]
+        return ne_zacnemo_na_zac + zacnemo_na_zac
+    
 # =============================================================================
 # Pobeg iz Finske
 # =============================================================================
@@ -112,6 +147,7 @@ from functools import cache
 # =============================================================================
 
 
+        
 
 # =============================================================================
 # Pričetek robotske vstaje

@@ -1,3 +1,4 @@
+import random
 ###############################################################################
 # Če imamo dve urejeni tabeli, potem urejeno združeno tabelo dobimo tako, da
 # urejeni tabeli zlijemo. Pri zlivanju vsakič vzamemo manjšega od začetnih
@@ -20,7 +21,16 @@
 #     [1, 1, 2, 3, 3, 4, 5, 5, 6, 7, 7, 10]
 #
 ###############################################################################
-
+def merge(target, list1, list2):
+    i1, i2 = 0, 0                   #indeksa, bomo spreminjali skozi zanko
+    for j in range(len(target)):
+        if (i2 >= len(list2)) or (i1 < len(list1) and list1[i1]<= list2[i2]):
+            target[j] = list1[i1]
+            i1 += 1
+        else:
+            target[j] = list2[i2]
+            i2 += 1
+    return
 
 ###############################################################################
 # Tabelo želimo urediti z zlivanjem (merge sort). Tabelo razdelimo na polovici,
@@ -37,7 +47,17 @@
 #     >>> a
 #     [2, 3, 4, 5, 10, 11, 15, 17, 18]
 ###############################################################################
-
+def mergesort(table):
+    if len(table) <= 1:
+        return
+    else:
+        polovicka = len(table) // 2
+        prva_pol, druga_pol = table[:polovicka], table[polovicka:]
+        mergesort(prva_pol)
+        mergesort(druga_pol)
+        merge(table, prva_pol, druga_pol)
+        return
+    
 ###############################################################################
 # Na predavanjih ste implementirali imperativno verzijo pivotiranja v OCamlu, 
 # prepišite jo v Python in jo uporabite kot osnovo za reševanje problemov s 
@@ -70,7 +90,22 @@
 #     >>> a
 #     [10, 0, 2, 4, 11, 5, 17, 15, 18]
 ###############################################################################
+def pivot(a, start, end):
+    if start == end :
+        return start
+    
+    pivot = a[start]
+    first_bigger = start + 1
 
+    for i in range(start+1, end+1):
+        if a[i] < pivot:
+            a[first_bigger], a[i] = a[i], a[first_bigger]
+            first_bigger += 1
+
+
+        a[start], a[first_bigger-1] = a[first_bigger-1], a[start]
+
+        return first_bigger -1           
 
 ###############################################################################
 # V tabeli želimo poiskati vrednost k-tega elementa po velikosti.
@@ -86,6 +121,7 @@
 # po velikosti. Funkcija sme spremeniti tabelo [a]. Cilj naloge je, da jo
 # rešite brez da v celoti uredite tabelo [a].
 ###############################################################################
+
 
 
 ###############################################################################
