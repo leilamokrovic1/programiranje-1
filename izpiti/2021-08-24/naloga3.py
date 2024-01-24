@@ -21,10 +21,66 @@
 # 
 # Na spodnji mreži je najvplivnejši sprehod (1, 2, 5, 30, 5, 30, -1, 5) vreden 77 sledilcev. 
 # =============================================================================
-
+from functools import cache
 piran = [
     [1, 2,  -3, -10, 9],
     [0, 0,   5,   5, 2],
     [1, 2,  30,  -1, 0],
     [4, 3, -20,  -1, 5],
 ]
+
+def sledilci(zemljevid):
+    d, s = len(zemljevid), len(zemljevid[0])
+
+    @cache
+    def pomozna(i, j):
+        if i == d - 1 and j == s - 1:
+            return zemljevid[i][j]
+        elif i < d and j < s:
+            # Premikanje desno, navzdol in diagonalno (desno-navzdol)
+            sprememba = zemljevid[i][j]
+            desno = pomozna(i, j + 1) if j + 1 < s else 0
+            navzdol = pomozna(i + 1, j) if i + 1 < d else 0
+            desno_navzdol = pomozna(i + 1, j + 1) if i + 1 < d and j + 1 < s else 0
+    
+            return sprememba + max(desno, navzdol, desno_navzdol)
+    @cache
+    def korak_nazaj(i,j):
+        if i >= d and j >= 0:
+            sprememba2 = zemljevid[i][j]
+            levo = korak_nazaj(i, j-1) if j-1 >= 0 else 0
+            navzgor = korak_nazaj(i-1, j) if i-1>= 0 else 0
+            levo_navzgor = korak_nazaj(i-1, j-1) if i-1 >= 0 and j-1>= 0 else 0
+            return  sprememba2 + max(levo, navzgor, levo_navzgor)
+    return pomozna(0, 0) + korak_nazaj(d-1,s-1)
+
+
+
+
+def sledilci2(zemljevid):
+    d, s = len(zemljevid), len(zemljevid[0])
+
+    @cache
+    def pomozna(i, j):
+        if i == d - 1 and j == s - 1:
+            return zemljevid[i][j]
+        elif i < d and j < s:
+            # Premikanje desno, navzdol in diagonalno (desno-navzdol)
+            sprememba = zemljevid[i][j]
+            desno = pomozna(i, j + 1) if j + 1 < s else 0
+            navzdol = pomozna(i + 1, j) if i + 1 < d else 0
+            desno_navzdol = pomozna(i + 1, j + 1) if i + 1 < d and j + 1 < s else 0
+    
+            return sprememba + max(desno, navzdol, desno_navzdol)
+        
+    @cache
+    def korak_nazaj(i, j):
+        if i >= 0 and j >= 0:
+            # Premikanje nazaj (levo, navzgor, levo-navzgor)
+            sprememba2 = zemljevid[i][j]
+            levo = korak_nazaj(i, j - 1) if j - 1 >= 0 else 0
+            navzgor = korak_nazaj(i - 1, j) if i - 1 >= 0 else 0
+            levo_navzgor = korak_nazaj(i - 1, j - 1) if i - 1 >= 0 and j - 1 >= 0 else 0
+            return sprememba2 + max(levo, navzgor, levo_navzgor)
+        
+    return pomozna(0, 0) + korak_nazaj(d - 1, s - 1)
